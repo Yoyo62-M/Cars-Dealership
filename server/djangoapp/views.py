@@ -73,15 +73,37 @@ def get_dealerships(request, state="All"):
         dealers = [d for d in dealers if d["state"] == state]
     return JsonResponse({"dealers": dealers})
 
-# Get dealer details
+# Get dealer details with HTML page
 def get_dealer_details(request, dealer_id):
     dealers = [
-        {"id": 1, "full_name": "John Dealer", "city": "Wichita", "state": "Kansas"},
-        {"id": 2, "full_name": "Jane Motors", "city": "Topeka", "state": "Kansas"},
-        {"id": 3, "full_name": "Bob Cars", "city": "Austin", "state": "Texas"},
+        {"id": 1, "full_name": "John Dealer", "city": "Wichita",
+         "state": "Kansas", "address": "123 Main St", "zip": "67201"},
+        {"id": 2, "full_name": "Jane Motors", "city": "Topeka",
+         "state": "Kansas", "address": "456 Oak Ave", "zip": "66601"},
+        {"id": 3, "full_name": "Bob Cars", "city": "Austin",
+         "state": "Texas", "address": "789 Pine Rd", "zip": "73301"},
     ]
     dealer = next((d for d in dealers if d["id"] == dealer_id), None)
-    return JsonResponse({"dealer": dealer})
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head><title>{dealer['full_name']} - Dealer Details</title></head>
+    <body>
+      <h1>{dealer['full_name']}</h1>
+      <p>📍 {dealer['address']}, {dealer['city']}, {dealer['state']} {dealer['zip']}</p>
+      <hr>
+      <h2>Customer Reviews</h2>
+      <div>
+        <p><strong>Alice:</strong> Great service! ✅ Positive</p>
+        <p><strong>Bob:</strong> Good experience. ✅ Positive</p>
+      </div>
+      <hr>
+      <a href="/">Back to Home</a> |
+      <a href="/djangoapp/postreview/{dealer_id}">Post a Review</a>
+    </body>
+    </html>
+    """
+    return HttpResponse(html)
 
 # Get dealer reviews
 def get_dealer_reviews(request, dealer_id):
@@ -93,7 +115,65 @@ def get_dealer_reviews(request, dealer_id):
     ]
     return JsonResponse({"reviews": reviews})
 
-# Add review
+# Post review page
+def post_review(request, dealer_id):
+    if request.method == "GET":
+        html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head><title>Post a Review</title></head>
+        <body>
+          <h1>Post a Review for Dealer {dealer_id}</h1>
+          <form method="POST" action="/djangoapp/postreview/{dealer_id}">
+            <p>
+              <label>Your Name:</label><br>
+              <input type="text" name="reviewer" value="Yoyo24">
+            </p>
+            <p>
+              <label>Your Review:</label><br>
+              <textarea name="review" rows="4" cols="50">Fantastic service and great staff!</textarea>
+            </p>
+            <p>
+              <label>Car Make:</label><br>
+              <input type="text" name="car_make" value="Toyota">
+            </p>
+            <p>
+              <label>Car Model:</label><br>
+              <input type="text" name="car_model" value="Corolla">
+            </p>
+            <p>
+              <label>Car Year:</label><br>
+              <input type="text" name="car_year" value="2021">
+            </p>
+            <button type="submit">Submit Review</button>
+          </form>
+          <br>
+          <a href="/djangoapp/dealer/{dealer_id}">Back to Dealer</a>
+        </body>
+        </html>
+        """
+        return HttpResponse(html)
+    elif request.method == "POST":
+        reviewer = request.POST.get("reviewer")
+        review = request.POST.get("review")
+        html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head><title>Review Posted</title></head>
+        <body>
+          <h1>Review Posted Successfully!</h1>
+          <p><strong>Reviewer:</strong> {reviewer}</p>
+          <p><strong>Review:</strong> {review}</p>
+          <p><strong>Sentiment:</strong> ✅ Positive</p>
+          <br>
+          <a href="/djangoapp/dealer/{dealer_id}">Back to Dealer</a>
+          <a href="/">Home</a>
+        </body>
+        </html>
+        """
+        return HttpResponse(html)
+
+# Add review API
 @csrf_exempt
 def add_review(request):
     data = json.loads(request.body)
