@@ -1,0 +1,5 @@
+Command:
+Invoke-WebRequest -Uri "http://localhost:8000/djangoapp/get_cars/" -Method GET | Select-Object -ExpandProperty Content
+
+Output:
+{"cars": [{"make": "Toyota", "model": "Corolla", "type": "Sedan", "year": 2021}, {"make": "Toyota", "model": "RAV4", "type": "SUV", "year": 2022}, {"make": "Ford", "model": "F-150", "type": "Truck", "year": 2022}, {"make": "Honda", "model": "Civic", "type": "Sedan", "year": 2021}, {"make": "Honda", "model": "CR-V", "type": "SUV", "year": 2023}]}

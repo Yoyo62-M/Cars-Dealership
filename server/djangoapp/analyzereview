@@ -1,0 +1,5 @@
+Command:
+Invoke-WebRequest -Uri "http://localhost:8000/djangoapp/analyze_review/Fantastic+services" -Method GET | Select-Object -ExpandProperty Content
+
+Output:
+{"sentiment": "positive", "review": "Fantastic+services"}
